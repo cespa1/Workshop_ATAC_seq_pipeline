@@ -1,5 +1,6 @@
 #!/bin/bash
-
+mkdir -p peak_calling
+mkdir -p fastqc
 ## Reducción de tamaño de los fastq para poder hacer los analisis durante el workshop 
 #zcat ENCFF047YJC.fastq.gz | seqtk sample -s100 - 500000 > R1_subset_A549.fastq
 #zcat ENCFF048FVL.fastq.gz | seqtk sample -s100 - 500000 > R2_subset_A549.fastq
@@ -50,7 +51,7 @@ samtools view -bhS $muestra"_sort_dedup.sam" > $muestra"_sort_dedup.bam"
 samtools index $muestra"_sort_dedup.bam" $muestra"_sort_dedup.bai"
 
 ## Visualización de la muestras en IGV
-igvtools count -z 5 -w 25 -e 250 $muestra"_sort_dedup.bam" $muestra"_dedup_sorted.tdf" ../Homo_sapiens.GRCh38.dna.primary_assembly.fa
+igvtools count -z 5 -w 25 -e 250 $muestra"_sort_dedup.bam" $muestra"_dedup_sorted.tdf" Homo_sapiens.GRCh38.dna.primary_assembly.fa
 
 ##Peak calling 
 macs2 callpeak -f BAMPE -g hs --keep-dup all --cutoff-analysis -n $muestra \
