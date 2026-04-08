@@ -1,5 +1,6 @@
 #!/bin/bash
-
+mkdir -p peak_calling
+mkdir -p fastqc
 ## Reducción de tamaño de los fastq para poder hacer los analisis durante el workshop 
 #zcat ENCFF047YJC.fastq.gz | seqtk sample -s100 - 500000 > R1_subset_A549.fastq
 #zcat ENCFF048FVL.fastq.gz | seqtk sample -s100 - 500000 > R2_subset_A549.fastq
@@ -20,7 +21,7 @@ for muestra in $(ls | grep subset | cut -d '_' -f3 | uniq )
 do 
 fastp -i "R1_subset"*$muestra -o "R1_subset_trim_"$muestra \
     -I "R2_subset"*$muestra -O "R2_subset_trim_"$muestra \
-    --detect_adapter_for_pe --thread 16
+    --detect_adapter_for_pe --thread 16 2> "fastp_log_"$muestra".txt"
 done
 
 ## Analisis de calidad de los fastq post-trimming
@@ -41,9 +42,11 @@ bowtie2 -x GRCh38_noalt_as -1 "R1_subset_trim"*$muestra*".fastq.gz" -2 "R2_subse
 
 ##Ordenamiento del SAM
 samtools sort $muestra".sam" -o $muestra"_sort.sam"
+samtools view -h $muestra"_sort.sam" | grep -E "^@|$(paste -sd'|' chroms.txt)" > $muestra"_sort_filt.sam"
+
 
 ##Marcar los duplicados de PCR de las muestras 
-picard MarkDuplicates I=$muestra"_sort.sam" O=$muestra"_sort_dedup.sam" M=picard_log.txt REMOVE_DUPLICATES=false
+picard MarkDuplicates I=$muestra"_sort_filt.sam" O=$muestra"_sort_dedup.sam" M=picard_log.txt REMOVE_DUPLICATES=false
 
 ##Transformar de SAM a BAM y hacer el index del bam 
 samtools view -bhS $muestra"_sort_dedup.sam" > $muestra"_sort_dedup.bam"
