@@ -37,7 +37,7 @@ multiqc .
 ## Alineamiento de las muestras usando bowtie2
 for muestra in $(ls | grep R1_subset_trim_ | grep ".fastq\b" | cut -d '_' -f4 | cut -d '.' -f1 | uniq )
 do 
-bowtie2 -x ../fastq/human_index -1 "R1_subset_trim"*$muestra*".fastq.gz" -2 "R2_subset_trim"*$muestra*".fastq.gz" -S $muestra".sam" -X 500 -p 23 --very-sensitive 2> "bowtie_log_"$muestra".txt"
+bowtie2 -x GRCh38_noalt_as -1 "R1_subset_trim"*$muestra*".fastq.gz" -2 "R2_subset_trim"*$muestra*".fastq.gz" -S $muestra".sam" -X 500 -p 23 --very-sensitive 2> "bowtie_log_"$muestra".txt"
 
 ##Ordenamiento del SAM
 samtools sort $muestra".sam" -o $muestra"_sort.sam"
@@ -50,7 +50,7 @@ samtools view -bhS $muestra"_sort_dedup.sam" > $muestra"_sort_dedup.bam"
 samtools index $muestra"_sort_dedup.bam" $muestra"_sort_dedup.bai"
 
 ## Visualización de la muestras en IGV
-igvtools count -z 5 -w 25 -e 250 $muestra"_sort_dedup.bam" $muestra"_dedup_sorted.tdf" ../Homo_sapiens.GRCh38.dna.primary_assembly.fa
+igvtools count -z 5 -w 25 -e 250 $muestra"_sort_dedup.bam" $muestra"_dedup_sorted.tdf" Homo_sapiens.GRCh38.dna.primary_assembly.fa
 
 ##Peak calling 
 macs2 callpeak -f BAMPE -g hs --keep-dup all --cutoff-analysis -n $muestra \
